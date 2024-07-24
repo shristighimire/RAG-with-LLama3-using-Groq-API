@@ -1,0 +1,700 @@
+Requirements Analysis and Gap (RAG) Document
+
+Project: Sample Web Application
+Date: [Insert Date]
+1. Requirements Overview
+Requirement ID	Requirement Description	Priority	Status
+RQ-001	User login functionality	High	Tested
+RQ-002	User registration functionality	High	Tested
+RQ-003	Password reset functionality	Medium	Not Tested
+RQ-004	User profile update functionality	Low	Tested
+RQ-005	Logout functionality	High	Tested
+2. Test Scripts
+Test Script 1: User Login Functionality
+
+Requirement ID: RQ-001
+Description: This script tests the user login functionality.
+Objective: Ensure that users can log in with valid credentials and receive appropriate error messages for invalid inputs.
+Steps:
+
+Open the login page.
+Enter valid username and password.
+Click the "Login" button.
+Verify that the user is redirected to the dashboard.
+Log out.
+Enter invalid username and password.
+Click the "Login" button.
+Verify that an error message is displayed.
+Expected Results:
+
+Users with valid credentials are successfully logged in and redirected to the dashboard.
+Users with invalid credentials receive an appropriate error message.
+Automated Test Script:
+
+import os
+import pytest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+
+@pytest.fixture
+def driver():
+    driver = webdriver.Chrome()  # Ensure ChromeDriver is installed and in your PATH
+    yield driver
+    driver.quit()
+
+def test_gmail_login(driver):
+    # Gmail credentials
+    gmail_email = os.getenv("GMAIL_EMAIL")  # Set your email in environment variables
+    gmail_password = os.getenv("GMAIL_PASSWORD")  # Set your password in environment variables
+
+    # Navigate to Gmail
+    driver.get("https://mail.google.com/")
+    
+    # Enter email
+    email_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "identifierId"))
+    )
+    email_input.send_keys(gmail_email)
+    email_input.send_keys(Keys.RETURN)
+    
+    # Enter password
+    password_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.NAME, "password"))
+    )
+    password_input.send_keys(gmail_password)
+    password_input.send_keys(Keys.RETURN)
+
+    # Verify login by checking for inbox element
+    inbox_loaded = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "div[aria-label='Primary']"))
+    )
+    
+    assert inbox_loaded is not None, "Login failed or inbox did not load"
+
+if __name__ == "__main__":
+    pytest.main([__file__])
+
+
+test_user_login()
+Test Script 2: User Registration Functionality
+
+Requirement ID: RQ-002
+Description: This script tests the user registration functionality.
+Objective: Ensure that new users can register with valid information and receive appropriate feedback for invalid inputs.
+Steps:
+
+Open the registration page.
+Enter valid user details (username, password, email).
+Click the "Register" button.
+Verify that the user receives a confirmation email.
+Verify that the user can log in with the new credentials.
+Enter invalid details (e.g., existing username, invalid email).
+Click the "Register" button.
+Verify that appropriate error messages are displayed.
+Expected Results:
+
+New users can register successfully with valid details.
+Appropriate error messages are displayed for invalid inputs.
+Automated Test Script:
+
+python
+Copy code
+def test_user_registration():
+    try:
+        # Open the registration page
+        driver.get("http://your-web-application-url/register")
+
+        # Enter valid user details
+        driver.find_element(By.ID, "username").send_keys("new_user")
+        driver.find_element(By.ID, "email").send_keys("new_user@example.com")
+        driver.find_element(By.ID, "password").send_keys("new_password")
+
+        # Click the "Register" button
+        driver.find_element(By.ID, "registerButton").click()
+
+        # Wait for registration to complete
+        time.sleep(3)
+
+        # Verify that a confirmation message is displayed
+        assert "Registration successful" in driver.page_source
+
+        # Verify that the user can log in with the new credentials
+        driver.get("http://your-web-application-url/login")
+        driver.find_element(By.ID, "username").send_keys("new_user")
+        driver.find_element(By.ID, "password").send_keys("new_password")
+        driver.find_element(By.ID, "loginButton").click()
+
+        time.sleep(3)
+        assert "Dashboard" in driver.title
+
+    finally:
+        # Close the browser
+        driver.quit()
+
+test_user_registration()
+Test Script 3: Password Reset Functionality
+
+Requirement ID: RQ-003
+Description: This script tests the password reset functionality.
+Objective: Ensure that users can reset their passwords using their registered email.
+Steps:
+
+Open the password reset page.
+Enter the registered email address.
+Click the "Reset Password" button.
+Verify that a password reset email is sent.
+Open the email and click the reset link.
+Enter a new password.
+Verify that the password is successfully updated and the user can log in with the new password.
+Expected Results:
+
+Users receive a password reset email.
+Users can successfully reset their password and log in with the new password.
+Automated Test Script:
+
+python
+Copy code
+def test_password_reset():
+    try:
+        # Open the password reset page
+        driver.get("http://your-web-application-url/password-reset")
+
+        # Enter the registered email address
+        driver.find_element(By.ID, "email").send_keys("registered_user@example.com")
+
+        # Click the "Reset Password" button
+        driver.find_element(By.ID, "resetButton").click()
+
+        # Wait for email to be sent
+        time.sleep(3)
+
+        # Assume the user received the email and clicked the reset link
+        driver.get("http://your-web-application-url/reset-link")
+
+        # Enter a new password
+        driver.find_element(By.ID, "newPassword").send_keys("new_password")
+        driver.find_element(By.ID, "confirmPassword").send_keys("new_password")
+        driver.find_element(By.ID, "resetPasswordButton").click()
+
+        # Verify that the password is successfully updated
+        time.sleep(3)
+        assert "Password reset successful" in driver.page_source
+
+        # Verify that the user can log in with the new password
+        driver.get("http://your-web-application-url/login")
+        driver.find_element(By.ID, "username").send_keys("registered_user")
+        driver.find_element(By.ID, "password").send_keys("new_password")
+        driver.find_element(By.ID, "loginButton").click()
+
+        time.sleep(3)
+        assert "Dashboard" in driver.title
+
+    finally:
+        # Close the browser
+        driver.quit()
+
+test_password_reset()
+Test Script 4: User Profile Update Functionality
+
+Requirement ID: RQ-004
+Description: This script tests the user profile update functionality.
+Objective: Ensure that users can update their profile information.
+Steps:
+
+Log in to the application.
+Navigate to the profile page.
+Update profile information (e.g., name, email).
+Click the "Save" button.
+Verify that the changes are saved and displayed correctly.
+Expected Results:
+
+Profile information is successfully updated and displayed correctly.
+Automated Test Script:
+
+python
+Copy code
+def test_user_profile_update():
+    try:
+        # Log in to the application
+        driver.get("http://your-web-application-url/login")
+        driver.find_element(By.ID, "username").send_keys("existing_user")
+        driver.find_element(By.ID, "password").send_keys("existing_password")
+        driver.find_element(By.ID, "loginButton").click()
+
+        time.sleep(3)
+
+        # Navigate to the profile page
+        driver.get("http://your-web-application-url/profile")
+
+        # Update profile information
+        driver.find_element(By.ID, "name").clear()
+        driver.find_element(By.ID, "name").send_keys("Updated Name")
+        driver.find_element(By.ID, "email").clear()
+        driver.find_element(By.ID, "email").send_keys("updated_email@example.com")
+
+        # Click the "Save" button
+        driver.find_element(By.ID, "saveButton").click()
+
+        # Verify that the changes are saved
+        time.sleep(3)
+        assert "Profile updated successfully" in driver.page_source
+
+    finally:
+        # Close the browser
+        driver.quit()
+
+test_user_profile_update()
+Test Script 5: Logout Functionality
+
+Requirement ID: RQ-005
+Description: This script tests the logout functionality.
+Objective: Ensure that users can log out successfully.
+Steps:
+
+Log in to the application.
+Click the "Logout" button.
+Verify that the user is redirected to the login page.
+Expected Results:
+
+Users are successfully logged out and redirected to the login page.
+Automated Test Script:
+
+python
+Copy code
+def test_logout():
+    try:
+        # Log in to the application
+        driver.get("http://your-web-application-url/login")
+        driver.find_element(By.ID, "username").send_keys("existing_user")
+        driver.find_element(By.ID, "password").send_keys("existing_password")
+        driver.find_element(By.ID, "loginButton").click()
+
+        time.sleep(3)
+
+        # Click the "Logout" button
+        driver.find_element(By.ID, "logoutButton").click()
+
+        # Verify that the user is redirected to the login page
+        time.sleep(3)
+        assert "Login" in driver.title
+
+    finally:
+        # Close the browser
+        driver.quit()
+
+test_logout()
+3. Unit Testing Automation Example
+Example Unit Test: User Registration Logic
+
+Functionality: Validate the logic for user registration, including input validation.
+Objective: Ensure that the registration logic correctly validates input data and handles various cases such as empty fields, invalid email format, and successful registration.
+Example Function to Test:
+
+python
+Copy code
+def register_user(username, email, password):
+    if not username or not email or not password:
+        return "All fields are required."
+    if "@" not in email:
+        return "Invalid email address."
+    # Simulate user registration logic
+    return "Registration successful."
+Unit Test Script:
+
+python
+Copy code
+import unittest
+
+class TestUserRegistration(unittest.TestCase):
+
+    def test_empty_fields(self):
+        self.assertEqual(register_user("", "email@example.com", "password"), "All fields are required.")
+        self.assertEqual(register_user("username", "", "password"), "All fields are required.")
+        self.assertEqual(register_user("username", "email@example.com", ""), "All fields are required.")
+
+    def test_invalid_email(self):
+        self.assertEqual(register_user("username", "emailexample.com", "password"), "Invalid email address.")
+        self.assertEqual(register_user("username", "email@.com", "password"), "Invalid email address.")
+
+    def test_successful_registration(self):
+        self.assertEqual(register_user("username", "email@example.com", "password"), "Registration successful.")
+
+if __name__ == "__main__":
+    unittest.main()
+Explanation:
+
+The register_user function is the logic being tested.
+The TestUserRegistration class contains unit tests to validate various cases:
+test_empty_fields checks if the function returns the appropriate message when any field is empty.
+test_invalid_email checks if the function correctly identifies invalid email addresses.
+test_successful_registration verifies that valid input data leads to a successful registration message.
+4. Gap Analysis
+Requirement ID	Requirement Description	Priority	Status	Gap Identified	Actions Needed
+RQ-001	User login functionality	High	Tested	None	N/A
+RQ-002	User registration functionality	High	Tested	None	N/A
+RQ-003	Password reset functionality	Medium	Not Tested	Test script needed	Create and execute test script
+RQ-004	User profile update functionality	Low	Tested	None	N/A
+RQ-005	Logout functionality	High	Tested	None	N/A
+5. Summary
+This document outlines the requirements for the sample web application and the corresponding test scripts used to validate these requirements. The gap analysis section identifies that the password reset functionality (RQ-003) still requires testing. Creating and executing a test script for this requirement will close the identified gap and ensure comprehensive testing coverage.
+
+5. Unit Testing
+from typing import List
+
+
+class ShoppingCart:
+    def __init__(self, max_size: int) -> None:
+        self.items: List[str] = []
+        self.max_size = max_size
+
+    def add(self, item: str):
+        if self.size() == self.max_size:
+            raise OverflowError("cannot add more items")
+        self.items.append(item)
+
+    def size(self) -> int:
+        return len(self.items)
+
+    def get_items(self) -> List[str]:
+        return self.items
+
+    def get_total_price(self, price_map):
+        total_price = 0
+        for item in self.items:
+            total_price += price_map.get(item)
+        return total_price
+The given code defines a ShoppingCart class that allows users to manage a collection of items with a specified maximum capacity.
+
+Key Features:
+Initialization: Sets up an empty list for items and a maximum size for the cart.
+Adding Items: Allows adding items to the cart, but raises an OverflowError if the cart is full.
+Getting Size: Provides the current number of items in the cart.
+Retrieving Items: Returns a list of all items in the cart.
+Calculating Total Price: Computes the total price of the items in the cart using a provided price map.
+
+Based on that code, the following tests will be run:
+
+A.
+# Generated by CodiumAI
+
+import pytest
+
+from shopping_cart import ShoppingCart
+
+class TestShoppingCart:
+
+    # Adding an item to the cart increases the size by one
+    def test_adding_item_increases_size(self):
+        cart = ShoppingCart(max_size=5)
+        initial_size = cart.size()
+        cart.add("apple")
+        assert cart.size() == initial_size + 1
+
+    # Adding an item when the cart is at max size raises an OverflowError
+    def test_adding_item_at_max_size_raises_error(self):
+        cart = ShoppingCart(max_size=1)
+        cart.add("apple")
+        with pytest.raises(OverflowError):
+            cart.add("banana")
+
+These tests ensure that adding an item correctly increases the cart's size and that an error is raised when attempting to add an item to a full cart.
+
+B.
+# Generated by CodiumAI
+
+import pytest
+
+class TestAdd:
+
+    # Adding an item when the cart is not full
+    def test_adding_item_when_cart_not_full(self):
+        cart = ShoppingCart(max_size=5)
+        cart.add("apple")
+        assert cart.size() == 1
+        assert "apple" in cart.items
+
+    # Adding an item when the cart is exactly one item away from being full
+    def test_adding_item_when_cart_one_item_away_from_full(self):
+        cart = ShoppingCart(max_size=3)
+        cart.add("apple")
+        cart.add("banana")
+        assert cart.size() == 2
+        cart.add("cherry")
+        assert cart.size() == 3
+        assert "cherry" in cart.items
+ # Adding an item when the cart is not full as well as, Adding an item when the cart is exactly one item away from being full
+
+C. # test_shopping_cart.py
+
+import pytest
+from shopping_cart import ShoppingCart
+
+@pytest.fixture
+def cart():
+    return ShoppingCart(5)
+
+def test_init(cart):
+    assert cart.max_size == 5
+    assert len(cart.items) == 0
+
+def test_add_item(cart):
+    cart.add("apple")
+    assert len(cart.items) == 1
+    assert cart.items[0] == "apple"
+
+def test_add_multiple_items(cart):
+    cart.add("apple")
+    cart.add("banana")
+    cart.add("orange")
+    assert len(cart.items) == 3
+    assert cart.items == ["apple", "banana", "orange"]
+
+def test_add_item_when_full(cart):
+    for _ in range(5):
+        cart.add("item")
+    with pytest.raises(OverflowError):
+        cart.add("extra item")
+
+def test_size(cart):
+    assert cart.size() == 0
+    cart.add("item")
+    assert cart.size() == 1
+    cart.add("item2")
+    assert cart.size() == 2
+
+def test_get_items(cart):
+    cart.add("item1")
+    cart.add("item2")
+    assert cart.get_items() == ["item1", "item2"]
+
+def test_get_total_price(cart):
+    price_map = {"apple": 1, "banana": 2, "orange": 3}
+    cart.add("apple")
+    cart.add("banana")
+    assert cart.get_total_price(price_map) == 3
+    cart.add("orange")
+    assert cart.get_total_price(price_map) == 6
+The `test_shopping_cart.py` file uses the `pytest` framework to test the functionality of the `ShoppingCart` class. Here is an overview of what each part of the testing code does:
+
+### Imports and Fixtures
+- **`import pytest`**: Imports the pytest framework for testing.
+- **`from shopping_cart import ShoppingCart`**: Imports the `ShoppingCart` class to be tested.
+- **`@pytest.fixture`**: Defines a fixture named `cart` that provides a fresh `ShoppingCart` instance with a maximum size of 5 for each test.
+
+### Test Functions
+- **`test_init(cart)`**: 
+  - Verifies that a new `ShoppingCart` instance has the correct maximum size (5) and that it starts with an empty list of items.
+
+- **`test_add_item(cart)`**:
+  - Tests adding a single item ("apple") to the cart and checks that the item is correctly added.
+
+- **`test_add_multiple_items(cart)`**:
+  - Tests adding multiple items ("apple", "banana", "orange") and verifies that all items are correctly added in the expected order.
+
+- **`test_add_item_when_full(cart)`**:
+  - Fills the cart to its maximum capacity and then verifies that adding an extra item raises an `OverflowError`.
+
+- **`test_size(cart)`**:
+  - Checks the size of the cart before and after adding items to ensure the `size` method returns the correct count.
+
+- **`test_get_items(cart)`**:
+  - Tests the `get_items` method to ensure it returns the correct list of items after adding them to the cart.
+
+- **`test_get_total_price(cart)`**:
+  - Verifies that the `get_total_price` method correctly calculates the total price of the items in the cart using a given price map.
+
+Each test function uses assertions to validate the expected behavior of the `ShoppingCart` methods, ensuring the class functions correctly under various scenarios.
+
+6.
+The provided code is a test case for the login functionality of the SauceDemo website using the `unittest` framework and `selenium` for browser automation. Here’s a breakdown of what the code does:
+
+### Test Case Class: `TestSauceDemoLogin`
+- **Imports**:
+  - `unittest`: Framework for organizing test cases.
+  - `selenium.webdriver` and related modules: Tools for browser automation and web element interaction.
+
+### Class Methods:
+- **`setUp(self)`**:
+  - Initializes the WebDriver for the Chrome browser.
+  - Maximizes the browser window.
+
+- **`test_login_functionality(self)`**:
+  - **Step 1**: Opens the SauceDemo website.
+  - **Step 2**: Finds the username input field and enters "standard_user".
+  - **Step 3**: Finds the password input field and enters "secret_sauce".
+  - **Step 4**: Finds the login button and clicks it.
+  - **Verification**: Waits until the page title contains "Swag Labs" to confirm a successful login and asserts that the title includes "Swag Labs".
+
+- **`tearDown(self)`**:
+  - Closes the browser window and quits the WebDriver.
+
+### Test Execution:
+- **`unittest.main()`**:
+  - Runs the test case when the script is executed.
+
+### Full Test Case Code:
+```python
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+class TestSauceDemoLogin(unittest.TestCase):
+
+    def setUp(self):
+        self.driver = webdriver.Chrome()  # Replace with your preferred browser
+        self.driver.maximize_window()
+
+    def test_login_functionality(self):
+        # Step 1: Go to website
+        self.driver.get("https://www.saucedemo.com")
+
+        # Step 2: Enter username
+        username_input = self.driver.find_element(By.ID, "user-name")
+        username_input.send_keys("standard_user")
+
+        # Step 3: Enter password
+        password_input = self.driver.find_element(By.ID, "password")
+        password_input.send_keys("secret_sauce")
+
+        # Step 4: Click login
+        login_button = self.driver.find_element(By.ID, "login-button")
+        login_button.click()
+
+        # Verify successful login
+        WebDriverWait(self.driver, 10).until(
+            EC.title_contains("Swag Labs")
+        )
+        assert "Swag Labs" in self.driver.title
+
+    def tearDown(self):
+        self.driver.quit()
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+This test case automates the process of logging into the SauceDemo website and verifies that the login was successful by checking the page title. Make sure you have the necessary WebDriver for your browser installed and configured correctly.
+
+7. 
+This test script is a set of unit tests written in Python using the pytest framework. The purpose of these tests is to verify the correctness and robustness of the calculate_area_square function from the area module. The calculate_area_square function calculates the area of a square, given its length. The code for the calculate function is: 
+
+def calculate_area_square(length: int | float) -> int | float:  
+    """  
+    Function to calculate the area of a square  
+    :param length: length of the square  
+    :return: area of the square  
+    """  
+    if not isinstance(length, (int, float)) or length <= 0:  
+        raise TypeError("Length must be a positive non-zero number")  
+    return length * length
+
+
+The unit test script is:
+
+import pytest  
+from area import calculate_area_square  
+  
+def test_calculate_area_square():  
+    assert calculate_area_square(2) == 4  
+    assert calculate_area_square(2.5) == 6.25  
+  
+def test_calculate_area_square_negative():  
+    with pytest.raises(TypeError):  
+        calculate_area_square(-2)  
+  
+def test_calculate_area_square_string():  
+    with pytest.raises(TypeError):  
+        calculate_area_square("2")  
+  
+def test_calculate_area_square_list():  
+    with pytest.raises(TypeError):  
+        calculate_area_square([2])
+
+8. 
+This code is a test script written in Python using the `pytest` framework and Selenium WebDriver for browser automation. It automates the process of creating an account on a Magento-based website and verifies that the account creation is successful. Here’s a high-level description of what the code does:
+
+1. **Setup and Teardown**: 
+   - A `pytest` fixture named `driver` is defined, which sets up a Selenium WebDriver instance for the Chrome browser before each test and ensures it is properly closed after the test completes.
+
+2. **Test Function**: 
+   - The `test_account_creation` function automates the steps for creating a new user account on the Magento website.
+   - It navigates to the website’s homepage.
+   - It locates and clicks the "Sign In" button to go to the login page.
+   - It locates and clicks the "Create an Account" button to go to the account creation page.
+   - It fills in the account creation form with details such as first name, last name, email address, password, and password confirmation.
+   - It submits the form to create the account.
+   - Finally, it verifies that the account creation was successful by checking if the current URL matches the expected URL of the account dashboard page. 
+
+Overall, this script automates the end-to-end process of navigating to a website, filling out a form, submitting it, and verifying the expected outcome using Selenium WebDriver within a `pytest` framework.
+
+import pytest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+@pytest.fixture
+def driver():
+    driver = webdriver.Chrome()  # Replace with your preferred browser
+    yield driver
+    driver.quit()
+
+def test_account_creation(driver):
+    # Navigate to the website
+    driver.get("https://magento.softwaretestingboard.com/")
+
+    # Click the sign in button
+    signin_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.LINK_TEXT, "Sign In"))
+    )
+    signin_button.click()
+
+    # Click the create an account button
+    create_account_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.LINK_TEXT, "Create an Account"))
+    )
+    create_account_button.click()
+
+    # Fill in the account creation form
+    first_name_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "firstname"))
+    )
+    first_name_input.send_keys("test")
+
+    last_name_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "lastname"))
+    )
+    last_name_input.send_keys("testing")
+
+    email_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "email_address"))
+    )
+    email_input.send_keys("test123458654fyrsdd@gmail.com")
+
+    password_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "password"))
+    )
+    password_input.send_keys("Test123!")
+
+    confirm_password_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "password-confirmation"))
+    )
+    confirm_password_input.send_keys("Test123!")
+
+    # Click the create an account button
+    create_account_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "form-validate"))
+    )
+    create_account_button.submit()
+
+    # Verify the account creation was successful
+    expected_url = "https://magento.softwaretestingboard.com/customer/account/"
+    assert driver.current_url == expected_url  
+
+
+
