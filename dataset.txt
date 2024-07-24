@@ -1,7 +1,6 @@
 Requirements Analysis and Gap (RAG) Document
 
 Project: Sample Web Application
-Date: [Insert Date]
 1. Requirements Overview
 Requirement ID	Requirement Description	Priority	Status
 RQ-001	User login functionality	High	Tested
